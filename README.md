@@ -1,2 +1,4 @@
-# network-service
-A client server service. Client sends to server processes info.
+# Client-Server Service
+- client sends to server processes info
+- server receives and print it
+- unified aka json data protocol
