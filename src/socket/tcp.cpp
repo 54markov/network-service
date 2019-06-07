@@ -1,41 +1,48 @@
 #include <socket/tcp.hpp>
+#include <exception/exception.hpp>
 
-TcpSocket::TcpSocket() : Socket::Socket(SOCK_STREAM)
+TcpSocket::TcpSocket() : Socket::Socket(SOCK_STREAM, "127.0.0.1", 8080)
 {
     ;
 }
 
-TcpSocket::~TcpSocket()
+void TcpSocket::send(DataProtocol &dataProtocol)
 {
-    ;
+    auto [buf, len] = dataProtocol.serialize();
+    if (::send(Socket::getFd(), buf, len, 0) == 0)
+        throw Exception("Can't send(): " + std::string(::strerror(errno)), errno);
 }
 
-int TcpSocket::send(const DataProtocol &dataProtocol)
+void TcpSocket::recv(DataProtocol &dataProtocol)
 {
-    // ssize_t send(int sockfd, const void *buf, size_t len, int flags);
-    return 0;
+    size_t len = 0;
+    void *buf = nullptr;
+
+    if (::recv(Socket::getFd(), buf, len, 0) != 0)
+        throw Exception("Can't recv(): " + std::string(::strerror(errno)), errno);
+
+    dataProtocol.deserialize();
 }
 
-int TcpSocket::recv(DataProtocol &dataProtocol)
+void TcpSocket::listen(int maxConnextions)
 {
-    // ssize_t recv(int sockfd, void *buf, size_t len, int flags);
-    return 0;
+    if (::listen(Socket::getFd(), maxConnextions) != 0)
+        throw Exception("Can't listen(): " + std::string(::strerror(errno)), errno);
 }
 
-int TcpSocket::listen()
+void TcpSocket::connect()
 {
-    // int listen(int sockfd, int backlog)
-    return 0;
+    auto addr = Socket::getAddr();
+    if (::connect(Socket::getFd(), (struct sockaddr* )&addr, sizeof(addr)) != 0)
+        throw Exception("Can't connect(): " + std::string(::strerror(errno)), errno);
 }
 
-int TcpSocket::connect()
+void TcpSocket::accept()
 {
-    // int connect(int sockfd, const struct sockaddr *addr, socklen_t addrlen)
-    return 0;
-}
+    socklen_t addrLen;
+    struct sockaddr clientAddr;
 
-int TcpSocket::accept()
-{
-    // int accept(int s, struct sockaddr *addr, socklen_t *addrlen)
-    return 0;
+    auto clientFd = ::accept(Socket::getFd(), &clientAddr, &addrLen);
+    if (clientFd == -1)
+        throw Exception("Can't accept(): " + std::string(::strerror(errno)), errno);
 }

@@ -1,12 +1,14 @@
 #pragma once
 
+#include <tuple>
+
 class DataProtocol
 {
     public:
         DataProtocol();
         ~DataProtocol();
 
-        void serialize();
+        std::tuple<char*, size_t> serialize();
         void deserialize();
 
         void gather();

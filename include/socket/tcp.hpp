@@ -8,12 +8,15 @@ class TcpSocket : public Socket
 {
     public:
         TcpSocket();
-        ~TcpSocket();
+        ~TcpSocket() = default;
 
-        int send(const DataProtocol &dataProtocol);
-        int recv(DataProtocol &dataProtocol);
+        void send(DataProtocol &dataProtocol);
+        void recv(DataProtocol &dataProtocol);
 
-        int listen();
-        int connect();
-        int accept();
+        void listen(int maxConnections);
+        void connect();
+        void accept();
+
+    private:
+        int maxConnections_;
 };

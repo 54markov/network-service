@@ -1,12 +1,17 @@
 #include <socket/socket.hpp>
+#include <exception/exception.hpp>
 
-Socket::Socket(int type)
+Socket::Socket(const int type, const char* ip, const int port)
 {
     try
     {
         fd_ = socket(AF_INET, type, 0); 
         if (fd_ == -1)
             throw "Can't create socket()";
+
+        socketAddr_.sin_family      = AF_INET;
+        socketAddr_.sin_addr.s_addr = ::inet_addr(ip);
+        socketAddr_.sin_port        = ::htons(port);
     }
     catch (...)
     {
@@ -22,7 +27,7 @@ Socket::~Socket()
     }
     catch(...)
     {
-        ; // Do not propagte exception
+        ; // Do not propagate exception
     }
 }
 
@@ -31,14 +36,18 @@ int Socket::getFd()
     return fd_;
 }
 
-void Socket::bind()
+struct sockaddr_in Socket::getAddr()
 {
-    // int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-    return;
+    return socketAddr_;
 }
 
-void Socket::sendsockopt()
+void Socket::bind()
 {
-    // 
-    return;
+    if (::bind(fd_, (sockaddr* )&socketAddr_, sizeof(socketAddr_)) != 0)
+        throw Exception("Can't bind(): " + std::string(::strerror(errno)), errno);
+}
+
+void Socket::sendSockOpt()
+{
+    // TODO
 }

@@ -2,22 +2,22 @@
 
 DataProtocol::DataProtocol()
 {
-	;
+    ;
 }
 
 DataProtocol::~DataProtocol()
 {
-	;
+    ;
 }
 
-void DataProtocol::serialize()
+std::tuple<char*, size_t> DataProtocol::serialize()
 {
-	;
+    return std::make_tuple(nullptr, 0);
 }
 
 void DataProtocol::deserialize()
 {
-	;
+    ;
 }
 
 void DataProtocol::gather()
@@ -27,5 +27,5 @@ void DataProtocol::gather()
 
 void DataProtocol::print()
 {
-	;
+    ;
 }

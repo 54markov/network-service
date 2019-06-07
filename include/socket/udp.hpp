@@ -8,8 +8,8 @@ class UdpSocket : public Socket
 {
     public:
         UdpSocket();
-        ~UdpSocket();
+        ~UdpSocket() = default;
 
-        int send(const DataProtocol &dataProtocol);
-        int recv(DataProtocol &dataProtocol);
+        void send(DataProtocol &dataProtocol);
+        void recv(DataProtocol &dataProtocol);
 };
