@@ -1,31 +1,29 @@
 #include <service/client.hpp>
 
-tcp::Client::Client()
-{
-    ;
-}
-
-tcp::Client::~Client()
-{
-    ;
-}
-
 int tcp::Client::run()
 {
+    DataProtocol dataProtocol;
+
+    socket_.connect();
+
+    while (1)
+    {
+        dataProtocol.gather();
+        socket_.send(dataProtocol);
+    }
+
     return 0;
-}
-
-udp::Client::Client()
-{
-    ;
-}
-
-udp::Client::~Client()
-{
-    ;
 }
 
 int udp::Client::run()
 {
+    DataProtocol dataProtocol;
+
+    while (1)
+    {
+        dataProtocol.gather();
+        socket_.send(dataProtocol);
+    }
+
     return 0;
 }

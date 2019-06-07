@@ -11,8 +11,8 @@ namespace tcp
             TcpSocket socket_;
 
         public:
-            Server();
-            ~Server();
+            Server() = default;
+            ~Server() = default;
 
             int run();
     };
@@ -26,8 +26,8 @@ namespace udp
             UdpSocket socket_;
 
         public:
-            Server();
-            ~Server();
+            Server() = default;
+            ~Server() = default;
 
             int run();
     };

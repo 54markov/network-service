@@ -1,31 +1,37 @@
 #include <service/server.hpp>
 
-tcp::Server::Server()
-{
-    ;
-}
-
-tcp::Server::~Server()
-{
-    ;
-}
-
 int tcp::Server::run()
 {
+    DataProtocol dataProtocol;
+
+    socket_.bind();
+    socket_.listen(10);
+
+    while (1)
+    {
+        // TODO: select()
+        socket_.accept();
+
+        socket_.recv(dataProtocol);
+
+        dataProtocol.print();
+    }
+
     return 0;
-}
-
-udp::Server::Server()
-{
-    ;
-}
-
-udp::Server::~Server()
-{
-    ;
 }
 
 int udp::Server::run()
 {
+    DataProtocol dataProtocol;
+
+    socket_.bind();
+
+    while (1)
+    {
+        socket_.recv(dataProtocol);
+
+        dataProtocol.print();
+    }
+
     return 0;
 }
