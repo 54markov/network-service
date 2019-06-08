@@ -14,7 +14,7 @@ int Client::run()
 
     socket_.get()->connect();
 
-    while (1)
+    while (!signalHandler_.isExit())
     {
         dataProtocol.gather();
         socket_.get()->send(dataProtocol);
@@ -37,7 +37,7 @@ int Client::run()
 {
     DataProtocol dataProtocol;
 
-    while (1)
+    while (!signalHandler_.isExit())
     {
         dataProtocol.gather();
         socket_.get()->send(dataProtocol);

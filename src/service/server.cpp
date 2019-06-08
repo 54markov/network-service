@@ -15,12 +15,12 @@ int Server::run()
     socket_.get()->bind();
     socket_.get()->listen(10); // TODO
 
-    while (1)
+    while (!signalHandler_.isExit())
     {
         // TODO: select()
-        socket_.get()->accept();
+        //socket_.get()->accept();
 
-        socket_.get()->recv(dataProtocol);
+        //socket_.get()->recv(dataProtocol);
 
         dataProtocol.print();
     }
@@ -44,7 +44,7 @@ int Server::run()
 
     socket_.get()->bind();
 
-    while (1)
+    while (!signalHandler_.isExit())
     {
         socket_.get()->recv(dataProtocol);
 

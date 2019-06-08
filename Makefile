@@ -7,7 +7,7 @@ CC          := g++
 CFLAGS      := -g -Wall -Werror -std=c++17
 IFLAGS      := -I ./src
 
-all: socket tcp udp data-protocol exception client server $(TARGET)
+all: socket tcp udp data-protocol exception client server signal $(TARGET)
 
 $(TARGET):
 	@echo "Building $@ ...";
@@ -20,7 +20,13 @@ $(TARGET):
 	$(BUILD_DIR)/socket.o \
 	$(BUILD_DIR)/tcp.o \
 	$(BUILD_DIR)/udp.o \
+	$(BUILD_DIR)/signal.o \
 	$(SRC_DIR)/main.cpp
+
+signal:
+	@echo "[ Building $@ ]";
+	@mkdir -p $(BUILD_DIR);
+	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/service/$@.cpp
 
 client:
 	@echo "[ Building $@ ]";

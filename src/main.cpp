@@ -7,7 +7,7 @@ int main(int argc, char const *argv[])
     const auto ip = std::string("127.0.0.1");
     const auto port = 8080;
 
-    auto is_server = false;
+    auto is_server = true;
 
     if (is_server)
     {

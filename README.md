@@ -6,7 +6,6 @@
 Check opensource project or other implementation
 After that continue an implementation
 
-// TODO signal handler
 // TODO select()
 // TODO connection closing
 // TODO data-protocol simple string run test
