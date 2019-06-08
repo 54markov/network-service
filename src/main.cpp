@@ -4,16 +4,19 @@
 
 int main(int argc, char const *argv[])
 {
-    auto is_server = true;
+    const auto ip = std::string("127.0.0.1");
+    const auto port = 8080;
+
+    auto is_server = false;
 
     if (is_server)
     {
-        auto sever = Service<tcp::Server>();
+        auto sever = Service<tcp::Server>(ip, port);
         sever.run();
     }
     else
     {
-        auto client = Service<tcp::Client>();
+        auto client = Service<tcp::Client>(ip, port);
         client.run();
     }
 

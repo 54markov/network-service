@@ -1,29 +1,49 @@
 #include <service/client.hpp>
 
-int tcp::Client::run()
+namespace tcp
+{
+
+Client::Client(const std::string& ip, const int port)
+{
+    socket_ = std::make_unique<tcp::Socket>(ip, port);
+}
+
+int Client::run()
 {
     DataProtocol dataProtocol;
 
-    socket_.connect();
+    socket_.get()->connect();
 
     while (1)
     {
         dataProtocol.gather();
-        socket_.send(dataProtocol);
+        socket_.get()->send(dataProtocol);
     }
 
     return 0;
 }
 
-int udp::Client::run()
+}
+
+namespace udp
+{
+
+Client::Client(const std::string& ip, const int port)
+{
+    socket_ = std::make_unique<udp::Socket>(ip, port);
+}
+
+int Client::run()
 {
     DataProtocol dataProtocol;
 
     while (1)
     {
         dataProtocol.gather();
-        socket_.send(dataProtocol);
+        socket_.get()->send(dataProtocol);
     }
 
     return 0;
+}
+
 }

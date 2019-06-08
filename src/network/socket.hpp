@@ -6,16 +6,16 @@
 
 #include <arpa/inet.h>
 
-// A sokcet base class
-class Socket
+// A socket base class
+class BaseSocket
 {
     private:
         int fd_;
         struct sockaddr_in socketAddr_;
 
     public:
-        explicit Socket(const int type, const char* ip, const int port);
-        ~Socket();
+        explicit BaseSocket(int type, const char* ip, int port);
+        ~BaseSocket();
 
         int getFd();
         struct sockaddr_in getAddr();

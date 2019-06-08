@@ -1,18 +1,26 @@
 #include <service/server.hpp>
 
-int tcp::Server::run()
+namespace tcp
+{
+
+Server::Server(const std::string& ip, const int port)
+{
+    socket_ = std::make_unique<tcp::Socket>(ip, port);
+}
+
+int Server::run()
 {
     DataProtocol dataProtocol;
 
-    socket_.bind();
-    socket_.listen(10);
+    socket_.get()->bind();
+    socket_.get()->listen(10); // TODO
 
     while (1)
     {
         // TODO: select()
-        socket_.accept();
+        socket_.get()->accept();
 
-        socket_.recv(dataProtocol);
+        socket_.get()->recv(dataProtocol);
 
         dataProtocol.print();
     }
@@ -20,18 +28,30 @@ int tcp::Server::run()
     return 0;
 }
 
-int udp::Server::run()
+}
+
+namespace udp
+{
+
+Server::Server(const std::string& ip, const int port)
+{
+    socket_ = std::make_unique<udp::Socket>(ip, port);
+}
+
+int Server::run()
 {
     DataProtocol dataProtocol;
 
-    socket_.bind();
+    socket_.get()->bind();
 
     while (1)
     {
-        socket_.recv(dataProtocol);
+        socket_.get()->recv(dataProtocol);
 
         dataProtocol.print();
     }
 
     return 0;
+}
+
 }

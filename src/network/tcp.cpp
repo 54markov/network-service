@@ -1,48 +1,54 @@
-#include <socket/tcp.hpp>
+#include <network/tcp.hpp>
 #include <exception/exception.hpp>
 
-TcpSocket::TcpSocket() : Socket::Socket(SOCK_STREAM, "127.0.0.1", 8080)
+namespace tcp
+{
+
+Socket::Socket(const std::string& ip, const int port)
+    : BaseSocket(SOCK_STREAM, ip.c_str(), port)
 {
     ;
 }
 
-void TcpSocket::send(DataProtocol &dataProtocol)
+void Socket::send(DataProtocol &dataProtocol)
 {
     auto [buf, len] = dataProtocol.serialize();
-    if (::send(Socket::getFd(), buf, len, 0) == 0)
+    if (::send(BaseSocket::getFd(), buf, len, 0) == 0)
         throw Exception("Can't send(): " + std::string(::strerror(errno)), errno);
 }
 
-void TcpSocket::recv(DataProtocol &dataProtocol)
+void Socket::recv(DataProtocol &dataProtocol)
 {
     size_t len = 0;
     void *buf = nullptr;
 
-    if (::recv(Socket::getFd(), buf, len, 0) != 0)
+    if (::recv(BaseSocket::getFd(), buf, len, 0) != 0)
         throw Exception("Can't recv(): " + std::string(::strerror(errno)), errno);
 
     dataProtocol.deserialize();
 }
 
-void TcpSocket::listen(int maxConnextions)
+void Socket::listen(int maxConnextions)
 {
-    if (::listen(Socket::getFd(), maxConnextions) != 0)
+    if (::listen(BaseSocket::getFd(), maxConnextions) != 0)
         throw Exception("Can't listen(): " + std::string(::strerror(errno)), errno);
 }
 
-void TcpSocket::connect()
+void Socket::connect()
 {
-    auto addr = Socket::getAddr();
-    if (::connect(Socket::getFd(), (struct sockaddr* )&addr, sizeof(addr)) != 0)
+    auto addr = BaseSocket::getAddr();
+    if (::connect(BaseSocket::getFd(), (struct sockaddr* )&addr, sizeof(addr)) != 0)
         throw Exception("Can't connect(): " + std::string(::strerror(errno)), errno);
 }
 
-void TcpSocket::accept()
+void Socket::accept()
 {
     socklen_t addrLen;
     struct sockaddr clientAddr;
 
-    auto clientFd = ::accept(Socket::getFd(), &clientAddr, &addrLen);
+    auto clientFd = ::accept(BaseSocket::getFd(), &clientAddr, &addrLen);
     if (clientFd == -1)
         throw Exception("Can't accept(): " + std::string(::strerror(errno)), errno);
+}
+
 }
