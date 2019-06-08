@@ -13,15 +13,12 @@ class Socket : public BaseSocket
         explicit Socket(const std::string& ip, const int port);
         ~Socket() = default;
 
-        void send(DataProtocol& dataProtocol);
-        void recv(DataProtocol& dataProtocol);
-
         void listen(int maxConnections);
         void connect();
-        void accept();
+        int accept();
 
-    private:
-        int maxConnections_;
+        void send(const int fd, DataProtocol& dataProtocol);
+        ssize_t recv(const int fd, DataProtocol& dataProtocol);
 };
 
 }

@@ -5,7 +5,3 @@
 
 Check opensource project or other implementation
 After that continue an implementation
-
-// TODO select()
-// TODO connection closing
-// TODO data-protocol simple string run test

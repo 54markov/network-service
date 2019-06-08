@@ -10,45 +10,54 @@ Socket::Socket(const std::string& ip, const int port)
     ;
 }
 
-void Socket::send(DataProtocol &dataProtocol)
+void Socket::listen(int maxConnetions)
 {
-    auto [buf, len] = dataProtocol.serialize();
-    if (::send(BaseSocket::getFd(), buf, len, 0) == 0)
-        throw Exception("Can't send(): " + std::string(::strerror(errno)), errno);
-}
-
-void Socket::recv(DataProtocol &dataProtocol)
-{
-    size_t len = 0;
-    void *buf = nullptr;
-
-    if (::recv(BaseSocket::getFd(), buf, len, 0) != 0)
-        throw Exception("Can't recv(): " + std::string(::strerror(errno)), errno);
-
-    dataProtocol.deserialize();
-}
-
-void Socket::listen(int maxConnextions)
-{
-    if (::listen(BaseSocket::getFd(), maxConnextions) != 0)
-        throw Exception("Can't listen(): " + std::string(::strerror(errno)), errno);
+    if (::listen(BaseSocket::getFd(), maxConnetions) != 0)
+        throw Exception("Can't listen(): " +
+                        std::string(::strerror(errno)), errno);
 }
 
 void Socket::connect()
 {
     auto addr = BaseSocket::getAddr();
     if (::connect(BaseSocket::getFd(), (struct sockaddr* )&addr, sizeof(addr)) != 0)
-        throw Exception("Can't connect(): " + std::string(::strerror(errno)), errno);
+        throw Exception("Can't connect(): " +
+                        std::string(::strerror(errno)), errno);
 }
 
-void Socket::accept()
+int Socket::accept()
 {
-    socklen_t addrLen;
     struct sockaddr clientAddr;
+    socklen_t addrLen = sizeof(clientAddr);
 
     auto clientFd = ::accept(BaseSocket::getFd(), &clientAddr, &addrLen);
     if (clientFd == -1)
-        throw Exception("Can't accept(): " + std::string(::strerror(errno)), errno);
+        throw Exception("Can't accept(): " +
+                        std::string(::strerror(errno)), errno);
+
+    return clientFd;
+}
+
+void Socket::send(const int fd, DataProtocol &dataProtocol)
+{
+    auto [buf, len] = dataProtocol.serialize();
+    if (::send(fd, buf, len, 0) == 0)
+        throw Exception("Can't send(): " +
+                        std::string(::strerror(errno)), errno);
+}
+
+ssize_t Socket::recv(const int fd, DataProtocol &dataProtocol)
+{
+    size_t len = 256;
+    char buf[256] = { 0 };
+
+    ssize_t bytes = ::recv(fd, buf, len, 0);
+    if (bytes == -1)
+        throw Exception("Can't recv(): " +
+                        std::string(::strerror(errno)), errno);
+
+    dataProtocol.deserialize(buf, len);
+    return bytes;
 }
 
 }

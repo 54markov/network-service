@@ -4,15 +4,13 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <fcntl.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 
 // A socket base class
 class BaseSocket
 {
-    private:
-        int fd_;
-        struct sockaddr_in socketAddr_;
-
     public:
         explicit BaseSocket(int type, const char* ip, int port);
         ~BaseSocket();
@@ -21,5 +19,27 @@ class BaseSocket
         struct sockaddr_in getAddr();
 
         void bind();
-        void sendSockOpt();
+        void close(const int fd);
+
+        void setOpt(const int level, const int options);
+
+        void setNonBlocking();
+        void setNonBlocking(const int fd);
+
+        int monitorFd(struct timeval& timeout);
+
+        bool isMonitorFdReady();
+        bool isMonitorFdReady(const int fd);
+
+        void setMonitorFd(const int fd);
+        void clearMonitorFd(const int fd);
+        void clearMonitorFdAll();
+
+    private:
+        int fd_;
+        int highFd_;
+
+        fd_set setFd_;
+
+        struct sockaddr_in address_;
 };

@@ -10,7 +10,7 @@ IFLAGS      := -I ./src
 all: socket tcp udp data-protocol exception client server signal $(TARGET)
 
 $(TARGET):
-	@echo "Building $@ ...";
+	@echo "[ Building $@ ]";
 	@mkdir -p $(BUILD_DIR)
 	@$(CC) $(CFLAGS) $(IFLAGS) -o $(BUILD_DIR)/$(TARGET) \
 	$(BUILD_DIR)/client.o \

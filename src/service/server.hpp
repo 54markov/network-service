@@ -4,7 +4,9 @@
 #include <network/tcp.hpp>
 #include <service/signal.hpp>
 
+#include <string>
 #include <memory>
+#include <map>
 
 namespace tcp
 {
@@ -33,6 +35,9 @@ class Server
     private:
         SignalHandler signalHandler_;
         std::unique_ptr<tcp::Socket> socket_;
+        std::map<int, std::string> connections_;
+
+        int processConnection_(const int fd);
 };
 
 }
