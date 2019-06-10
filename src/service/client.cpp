@@ -22,11 +22,22 @@ int Client::run()
         std::cout << "[TCP::Client] Connecting" << std::endl;
         socket_.get()->connect();
         auto fd = socket_.get()->getFd();
+        socket_.get()->setNonBlocking(fd);
 
         while (!signalHandler_.isExit())
         {
+            if (Client::isConnected(fd))
+            {
+                std::cout << "[TCP::Client] Server is hang up" << std::endl;
+                break;
+            }
+
             std::cout << "[TCP::Client] Gathering data" << std::endl;
-            dataProtocol.gather();
+            dataProtocol.gather1();
+            std::cout << "[TCP::Client] Sending data" << std::endl;
+            socket_.get()->send(fd, dataProtocol);
+            std::cout << "[TCP::Client] Gathering data" << std::endl;
+            dataProtocol.gather2();
             std::cout << "[TCP::Client] Sending data" << std::endl;
             socket_.get()->send(fd, dataProtocol);
 
@@ -40,6 +51,14 @@ int Client::run()
 
     std::cout << "[TCP::Client] Closing" << std::endl;
     return 0;
+}
+
+bool Client::isConnected(const int fd)
+{
+    if (socket_.get()->check(fd) == 0)
+        return true;
+    else
+        return false;
 }
 
 }
@@ -63,9 +82,9 @@ int Client::run()
         while (!signalHandler_.isExit())
         {
             std::cout << "[TCP::Client] Gathering data" << std::endl;
-            dataProtocol.gather();
+            dataProtocol.gather1();
             std::cout << "[TCP::Client] Sending data" << std::endl;
-            socket_.get()->send(/*fd,*/ dataProtocol);
+            socket_.get()->send(dataProtocol);
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
@@ -73,6 +92,10 @@ int Client::run()
     catch(Exception& exception)
     {
         std::cerr << exception.what() << std::endl;
+    }
+    catch (...)
+    {
+        std::cerr << "Unhanlde exception" << std::endl;
     }
 
     std::cout << "[TCP::Client] Closing" << std::endl;

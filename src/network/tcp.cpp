@@ -1,6 +1,8 @@
 #include <network/tcp.hpp>
 #include <exception/exception.hpp>
 
+#include <iostream>
+
 namespace tcp
 {
 
@@ -40,8 +42,8 @@ int Socket::accept()
 
 void Socket::send(const int fd, DataProtocol &dataProtocol)
 {
-    auto [buf, len] = dataProtocol.serialize();
-    if (::send(fd, buf, len, 0) == 0)
+    auto str = dataProtocol.serialize();
+    if (::send(fd, str.c_str(), str.length(), 0) == 0)
         throw Exception("Can't send(): " +
                         std::string(::strerror(errno)), errno);
 }
@@ -56,8 +58,16 @@ ssize_t Socket::recv(const int fd, DataProtocol &dataProtocol)
         throw Exception("Can't recv(): " +
                         std::string(::strerror(errno)), errno);
 
-    dataProtocol.deserialize(buf, len);
+    dataProtocol.deserialize(std::string(buf));
     return bytes;
+}
+
+ssize_t Socket::check(const int fd)
+{
+    char buf[1] = { 0 };
+    return ::recv(fd, buf, 1, MSG_PEEK | MSG_DONTWAIT);
+    // Afterwards, you must check errno if it fails.
+    // It can fail with EAGAIN or it can fail with EBADF or ENOTCONN etc.
 }
 
 }

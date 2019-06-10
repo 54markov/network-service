@@ -19,6 +19,8 @@ class Socket : public BaseSocket
 
         void send(const int fd, DataProtocol& dataProtocol);
         ssize_t recv(const int fd, DataProtocol& dataProtocol);
+
+        ssize_t check(const int fd);
 };
 
 }

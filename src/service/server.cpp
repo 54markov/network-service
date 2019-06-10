@@ -16,6 +16,14 @@ Server::Server(const std::string& ip, const int port)
     socket_->listen(10);
 }
 
+Server::~Server()
+{
+    for (auto i: connections_)
+    {
+        socket_.get()->close(i.first);
+    }
+}
+
 int Server::run()
 {
     std::cout << "[TCP::Server] Starting" << std::endl;
@@ -78,7 +86,6 @@ int Server::processConnection_(const int fd)
     return 0;
 }
 
-
 }
 
 namespace udp
@@ -97,7 +104,6 @@ int Server::run()
     while (!signalHandler_.isExit())
     {
         socket_.get()->recv(dataProtocol);
-
         dataProtocol.print();
     }
 

@@ -29,6 +29,8 @@ class Client
     private:
         SignalHandler signalHandler_;
         std::unique_ptr<tcp::Socket> socket_;
+
+        bool isConnected(const int fd);
 };
 
 }
