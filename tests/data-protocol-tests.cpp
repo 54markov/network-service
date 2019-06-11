@@ -11,7 +11,6 @@ namespace Color
 
 int main(int argc, char const *argv[])
 {
-
     const std::vector<std::string> test = {
         "{}",
         "{\"root\":\"value0\"}",
