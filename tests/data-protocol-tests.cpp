@@ -48,10 +48,8 @@ int main(int argc, char const *argv[])
             std::cout << Color::red << "Fail" << Color::reset << std::endl;
     }
 
-    dataProtocol.gather1();
-    dataProtocol.print();
-    dataProtocol.gather2();
-    dataProtocol.print();
+    auto key = std::string("k5");
+    std::cout << dataProtocol.find(key) << std::endl;
 
     return 0;
 }

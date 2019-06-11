@@ -1,6 +1,7 @@
 #include <exception/exception.hpp>
 
-Exception::Exception(const std::string& err, const int code) : code_(code), err_(err)
+Exception::Exception(const std::string& err, const int code)
+    : code_(code), err_(err)
 {
     ;
 }

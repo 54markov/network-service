@@ -46,7 +46,7 @@ int Server::run()
         {
             if (socket_.get()->isMonitorFdReady())
             {
-                std::cout << "[TCP::Server] New connection" << std::endl;
+                std::cout << "[TCP::Server] A new connection" << std::endl;
                 connections_.insert(std::make_pair(socket_.get()->accept(), "client"));
             }
 
@@ -93,20 +93,12 @@ namespace udp
 
 Server::Server(const std::string& ip, const int port)
 {
-    socket_ = std::make_unique<udp::Socket>(ip, port);
-    socket_.get()->bind();
+    // TODO
 }
 
 int Server::run()
 {
-    DataProtocol dataProtocol;
-
-    while (!signalHandler_.isExit())
-    {
-        socket_.get()->recv(dataProtocol);
-        dataProtocol.print();
-    }
-
+    // TODO
     return 0;
 }
 

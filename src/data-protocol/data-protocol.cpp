@@ -1,103 +1,9 @@
 #include <data-protocol/data-protocol.hpp>
+#include <data-protocol/data-string.hpp>
+#include <data-protocol/data-object.hpp>
+#include <data-protocol/data-array.hpp>
 
 #include <iostream>
-
-DataPair::DataPair(std::string name, std::unique_ptr<IData>& data)
-{
-    name_ = name;
-    value_ = std::move(data);
-}
-
-void DataPair::print()
-{
-    std::cout << name_ << ":";
-    value_->print();
-}
-
-std::string DataPair::serialize()
-{
-    return "\"" + name_ + "\"" + ":" + value_->serialize();
-}
-
-DataString::DataString(std::string string)
-{
-    string_ = string;
-}
-
-void DataString::print()
-{
-    std::cout << string_;
-}
-
-std::string DataString::serialize()
-{
-    return "\"" + string_ + "\"";
-}
-
-void DataArray::add(std::unique_ptr<IData>& data)
-{
-    array_.push_back(std::move(data));
-}
-
-void DataArray::print()
-{
-    std::cout << "[";
-    for (auto i = 0; i < (int)array_.size(); i++)
-    {
-        array_[i]->print();
-        if (i < (int)array_.size() - 1)
-            std::cout << ",";
-    }
-    std::cout << "]";
-}
-
-std::string DataArray::serialize()
-{
-    std::string string = "[";
-    for (auto i = 0; i < (int)array_.size(); i++)
-    {
-        string += array_[i]->serialize();
-        if (i < (int)array_.size() - 1)
-            string += ",";
-    }
-    string += "]";
-    return string;
-}
-
-DataObject::DataObject(std::unique_ptr<IData>& data)
-{
-    pairs_.push_back(std::move(data));
-}
-
-void DataObject::add(std::unique_ptr<IData>& data)
-{
-    pairs_.push_back(std::move(data));
-}
-
-void DataObject::print()
-{
-    std::cout << "{";
-    for (auto i = 0; i < (int)pairs_.size(); i++)
-    {
-        pairs_[i]->print();
-        if (i < (int)pairs_.size() - 1)
-            std::cout << ",";
-    }
-    std::cout << "}";
-}
-
-std::string DataObject::serialize()
-{
-    std::string string = "{";
-    for (auto i = 0; i < (int)pairs_.size(); i++)
-    {
-        string += pairs_[i]->serialize();
-        if (i < (int)pairs_.size() - 1)
-            string += ",";
-    }
-    string += "}";
-    return string;
-}
 
 std::string DataProtocol::serialize()
 {
@@ -105,82 +11,6 @@ std::string DataProtocol::serialize()
         return data_.get()->serialize();
     else
         return std::string("{}");
-}
-
-void DataProtocol::deserialize(std::string string)
-{
-    auto deleted = std::move(data_);
-    data_ = std::move(DataProtocol::parse_(string));
-}
-
-void DataProtocol::gather1()
-{
-    auto deleted = std::move(data_);
-
-    std::unique_ptr<IData> value1 = std::make_unique<DataString>("40%");
-    std::unique_ptr<IData> value2 = std::make_unique<DataString>("50%");
-    std::unique_ptr<IData> value3 = std::make_unique<DataString>("60%");
-    std::unique_ptr<IData> value4 = std::make_unique<DataString>("70%");
-
-    std::unique_ptr<IData> pair1 = std::make_unique<DataPair>("CPU1", value1);
-    std::unique_ptr<IData> pair2 = std::make_unique<DataPair>("CPU2", value2);
-    std::unique_ptr<IData> pair3 = std::make_unique<DataPair>("CPU3", value3);
-    std::unique_ptr<IData> pair4 = std::make_unique<DataPair>("CPU4", value4);
-
-    std::unique_ptr<IData> obj1 = std::make_unique<DataObject>(pair1);
-    std::unique_ptr<IData> obj2 = std::make_unique<DataObject>(pair2);
-    std::unique_ptr<IData> obj3 = std::make_unique<DataObject>(pair3);
-    std::unique_ptr<IData> obj4 = std::make_unique<DataObject>(pair4);
-
-    auto dataArray = std::make_unique<DataArray>();
-    dataArray.get()->add(obj1);
-    dataArray.get()->add(obj2);
-    dataArray.get()->add(obj3);
-    dataArray.get()->add(obj4);
-
-    std::unique_ptr<IData> iDataArray = std::move(dataArray);
-
-    std::unique_ptr<IData> root = std::make_unique<DataPair>("System usage", iDataArray);
-
-    data_ = std::make_unique<DataObject>(root);
-}
-
-void DataProtocol::gather2()
-{
-    auto deleted = std::move(data_);
-
-    std::unique_ptr<IData> valuePid1 = std::make_unique<DataString>("1234");
-    std::unique_ptr<IData> pairPid1 = std::make_unique<DataPair>("PID", valuePid1);
-    std::unique_ptr<IData> objPid1 = std::make_unique<DataObject>(pairPid1);
-
-    std::unique_ptr<IData> valuePerYes = std::make_unique<DataString>("yes");
-    std::unique_ptr<IData> pairPerYes = std::make_unique<DataPair>("Read", valuePerYes);
-    std::unique_ptr<IData> objPerYes = std::make_unique<DataObject>(pairPerYes);
-
-    std::unique_ptr<IData> valuePerNo = std::make_unique<DataString>("no");
-    std::unique_ptr<IData> pairPerNo = std::make_unique<DataPair>("Write", valuePerNo);
-    std::unique_ptr<IData> objPerNo = std::make_unique<DataObject>(pairPerNo);
-
-    auto array0 = std::make_unique<DataArray>();
-    array0.get()->add(objPerYes);
-    array0.get()->add(objPerNo);
-
-    std::unique_ptr<IData> iArray0 = std::move(array0);
-    std::unique_ptr<IData> pair1 = std::make_unique<DataPair>("Permissions", iArray0);
-    std::unique_ptr<IData> obj1 = std::make_unique<DataObject>(pair1);
-
-    std::unique_ptr<IData> pair2 = std::make_unique<DataPair>("Process", objPid1);
-    std::unique_ptr<IData> obj2 = std::make_unique<DataObject>(pair2);
-
-    auto array1 = std::make_unique<DataArray>();
-    array1.get()->add(obj1);
-    array1.get()->add(obj2);
-
-    std::unique_ptr<IData> iArray1 = std::move(array1);
-
-    std::unique_ptr<IData> root = std::make_unique<DataPair>("Request", iArray1);
-
-    data_ = std::make_unique<DataObject>(root);
 }
 
 void DataProtocol::print()
@@ -194,6 +24,46 @@ void DataProtocol::print()
     {
         std::cout << "{}" << std::endl;
     }
+}
+
+void DataProtocol::deserialize(std::string string)
+{
+    auto deleted = std::move(data_);
+    data_ = std::move(DataProtocol::parse_(string));
+}
+
+
+void DataProtocol::build(std::vector<CpuData>& v)
+{
+    auto deleted = std::move(data_);
+
+    std::string root = "Cpu usage";
+
+    auto dataArray = std::make_unique<DataArray>();
+
+    for (auto i : v)
+    {
+        std::string cpu = i.name;
+        std::string usage = std::to_string(i.usage);
+        std::unique_ptr<IData> value =
+            std::make_unique<DataString>(usage);
+        std::unique_ptr<IData> object =
+            std::make_unique<DataObject>(cpu, value);
+        dataArray.get()->add(object);
+    }
+
+    std::unique_ptr<IData> iArray = std::move(dataArray);
+    std::unique_ptr<IData> iObject = std::make_unique<DataObject>(root, iArray);
+
+    data_ = std::move(iObject);
+}
+
+std::string DataProtocol::find(std::string& key)
+{
+    if (data_.get() != nullptr)
+        return data_.get()->find(key);
+    else
+        return std::string("{}");
 }
 
 std::vector<std::string> DataProtocol::split_(std::string s, const std::string& delimiter)
@@ -229,7 +99,7 @@ std::unique_ptr<IData> DataProtocol::parseObject_(std::string string)
     string.erase(string.end() - 1);
 
     if (string.length() == 0)
-        return nullptr; // An empty Object
+        return nullptr; // An empty IData
 
     std::size_t found = string.find(":");
     std::string key = std::string(string.begin(), string.begin() + found);
@@ -240,9 +110,8 @@ std::unique_ptr<IData> DataProtocol::parseObject_(std::string string)
 
     if (value[0] != '\"')
     {
-        auto newValue = DataProtocol::parse_(value);
-        std::unique_ptr<IData> entry = std::make_unique<DataPair>(key, newValue);
-        return std::make_unique<DataObject>(entry);
+        std::unique_ptr<IData> newValue = DataProtocol::parse_(value);
+        return std::make_unique<DataObject>(key, newValue);
     }
     else
     {
@@ -250,19 +119,16 @@ std::unique_ptr<IData> DataProtocol::parseObject_(std::string string)
         value.erase(value.end() - 1);
 
         std::unique_ptr<IData> newValue = std::make_unique<DataString>(value);
-        std::unique_ptr<IData> entry = std::make_unique<DataPair>(key, newValue);
-        return std::make_unique<DataObject>(entry);
+        return std::make_unique<DataObject>(key, newValue);
     }
 
-    return nullptr;
+    return nullptr; // An empty IData
 }
 
 std::unique_ptr<IData> DataProtocol::parseArray_(std::string string)
 {
     if (string.length() == 0)
-        return nullptr;
-
-    //std::cout << "Array: " << string << std::endl;
+        return nullptr; // An empty IData
 
     auto dataArray = std::make_unique<DataArray>();
 
@@ -308,7 +174,7 @@ std::unique_ptr<IData> DataProtocol::parseArray_(std::string string)
 std::unique_ptr<IData> DataProtocol::parse_(std::string string)
 {
     if (string.length() == 0)
-        return nullptr;
+        return nullptr; // An empty IData
 
     switch (string[0])
     {
@@ -317,5 +183,5 @@ std::unique_ptr<IData> DataProtocol::parse_(std::string string)
         default: break;
     }
 
-    return nullptr;
+    return nullptr; // An empty IData
 }
