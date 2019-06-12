@@ -9,8 +9,8 @@ class Service : public T
         explicit Service(const std::string& ip, const int port) : T(ip, port) { }
         ~Service() = default;
 
-        int run()
+        void run()
         {
-            return T::run();
+            T::run();
         }
 };

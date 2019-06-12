@@ -13,18 +13,16 @@ Server::Server(const std::string& ip, const int port)
     socket_.get()->setOpt(SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT);
 
     socket_.get()->bind();
-    socket_->listen(10);
+    socket_->listen(10); // Only 10 clients allowed
 }
 
 Server::~Server()
 {
-    for (auto i: connections_)
-    {
+    for (auto i : connections_)
         socket_.get()->close(i.first);
-    }
 }
 
-int Server::run()
+void Server::run()
 {
     std::cout << "[TCP::Server] Starting" << std::endl;
 
@@ -46,14 +44,15 @@ int Server::run()
         {
             if (socket_.get()->isMonitorFdReady())
             {
-                std::cout << "[TCP::Server] A new connection" << std::endl;
-                connections_.insert(std::make_pair(socket_.get()->accept(), "client"));
+                auto fd = socket_.get()->accept();
+                std::cout << "[TCP::Server] A new connection, fd " << fd << std::endl;
+                connections_.insert(std::make_pair(fd, ""));
             }
 
             auto it = connections_.begin();
             while (it != connections_.end())
             {
-                if (Server::processConnection_(it->first))
+                if (Server::processConnection_(it->first) == CLOSE)
                     it = connections_.erase(it);
                 else
                     it++;
@@ -62,28 +61,24 @@ int Server::run()
     }
 
     std::cout << "[TCP::Server] Closing" << std::endl;
-    return 0;
 }
 
-int Server::processConnection_(const int fd)
+rCode Server::processConnection_(const int fd)
 {
-    DataProtocol dataProtocol;
-
     if (!socket_.get()->isMonitorFdReady(fd))
-        return 0;  
+        return NONE;
 
+    DataProtocol dataProtocol;
     if (socket_.get()->recv(fd, dataProtocol) == 0)
     {
-        std::cout << "[TCP::Server] Closing connection" << std::endl;
+        std::cout << "[TCP::Server] Closing connection, fd " << fd << std::endl;
         socket_.get()->close(fd);
-        return 1;
-    }
-    else
-    {
-        dataProtocol.print();
+        return CLOSE;
     }
 
-    return 0;
+    dataProtocol.print();
+
+    return NONE;
 }
 
 }
@@ -96,10 +91,9 @@ Server::Server(const std::string& ip, const int port)
     // TODO
 }
 
-int Server::run()
+void Server::run()
 {
     // TODO
-    return 0;
 }
 
 }

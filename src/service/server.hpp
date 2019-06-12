@@ -11,6 +11,13 @@
 namespace tcp
 {
 
+typedef enum
+{
+    NONE,
+    FAIL,
+    CLOSE
+} rCode;
+
 /******************************************************************************/
 /* create  : Socket                                                           */
 /*             |                                                              */
@@ -30,14 +37,14 @@ class Server
         explicit Server(const std::string& ip, const int port);
         ~Server();
 
-        int run();
+        void run();
 
     private:
         SignalHandler signalHandler_;
         std::unique_ptr<tcp::Socket> socket_;
         std::map<int, std::string> connections_;
 
-        int processConnection_(const int fd);
+        rCode processConnection_(const int fd);
 };
 
 }
@@ -60,7 +67,7 @@ class Server
         explicit Server(const std::string& ip, const int port);
         ~Server() = default;
 
-        int run();
+        void run();
 
     private:
         SignalHandler signalHandler_;

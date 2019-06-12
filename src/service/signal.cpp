@@ -1,4 +1,5 @@
 #include <service/signal.hpp>
+#include <exception/exception.hpp>
 
 #include <iostream>
 
@@ -13,7 +14,9 @@ namespace
 
 SignalHandler::SignalHandler()
 {
-    std::signal(SIGINT, SignalHandler::process);
+    if (std::signal(SIGINT, SignalHandler::process) == SIG_ERR)
+        throw Exception("Can't set signal(): " +
+                        std::string(::strerror(errno)), errno);
     exit_ = 0;
 }
 

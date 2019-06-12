@@ -18,7 +18,8 @@ int Client::run()
     std::cout << "[TCP::Client] Starting" << std::endl;
     DataProtocol dataProtocol;
 
-    try {
+    try
+    {
         std::cout << "[TCP::Client] Connecting" << std::endl;
         socket_.get()->connect();
 

@@ -51,7 +51,7 @@ void BaseSocket::bind()
 
 void BaseSocket::close(const int fd)
 {
-    if (::close(fd_) == -1)
+    if (::close(fd) == -1)
         throw Exception("Can't close socket(): " +
                         std::string(::strerror(errno)), errno);
 }

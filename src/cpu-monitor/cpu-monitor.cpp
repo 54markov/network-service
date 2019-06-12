@@ -21,7 +21,7 @@ std::vector<CpuData> CpuMonitor::getUsage()
     return curr;
 }
 
-void CpuMonitor::readProc_(std::vector<CpuData>& v)
+void CpuMonitor::readProc_(std::vector<CpuData>& cpuData)
 {
     std::ifstream file("/proc/stat");
     if (!file.is_open())
@@ -38,32 +38,30 @@ void CpuMonitor::readProc_(std::vector<CpuData>& v)
         {
             std::istringstream is(line);
 
-            auto cpuData = CpuData();
+            auto cpu = CpuData();
 
-            // Reads cpu label
-            is >> cpuData.name;
-
-            // Reads times
+            is >> cpu.name;
             for (auto i = 0; i < NUM_CPU_STATES; ++i)
-                is >> cpuData.times[i];
+                is >> cpu.times[i];
 
-            v.push_back(cpuData);
+            cpuData.push_back(cpu);
         }
     }
 
     file.close();
 }
 
-size_t CpuMonitor::calcIdleTime_(const CpuData& c)
+size_t CpuMonitor::calcIdleTime_(const CpuData& cpuData)
 {
-    return c.times[S_IDLE] + c.times[S_IOWAIT];
+    return cpuData.times[S_IDLE] + cpuData.times[S_IOWAIT];
 }
 
-size_t CpuMonitor::calcActiveTime_(const CpuData& c)
+size_t CpuMonitor::calcActiveTime_(const CpuData& cpuData)
 {
-    return c.times[S_USER]  + c.times[S_NICE]    + c.times[S_SYSTEM] +
-           c.times[S_IRQ]   + c.times[S_SOFTIRQ] + c.times[S_STEAL]  +
-           c.times[S_GUEST] + c.times[S_GUEST_NICE];
+    return cpuData.times[S_USER]    + cpuData.times[S_NICE]  +
+           cpuData.times[S_SYSTEM]  + cpuData.times[S_IRQ]   +
+           cpuData.times[S_SOFTIRQ] + cpuData.times[S_STEAL] +
+           cpuData.times[S_GUEST]   + cpuData.times[S_GUEST_NICE];
 }
 
 void CpuMonitor::calcDiff_(const std::vector<CpuData>& a, std::vector<CpuData>& b)
