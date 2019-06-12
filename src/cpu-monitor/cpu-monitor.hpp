@@ -36,7 +36,7 @@ class CpuMonitor
 
     private:
         void readProc_(std::vector<CpuData>& cpuData);
-        size_t calcIdleTime_(const CpuData& cpuData);
-        size_t calcActiveTime_(const CpuData& cpuData);
-        void calcDiff_(const std::vector<CpuData>& a, std::vector<CpuData>& b);
+        size_t computeIdleTime_(const CpuData& cpuData);
+        size_t computeActiveTime_(const CpuData& cpuData);
+        void computeDiff_(const std::vector<CpuData>& a, std::vector<CpuData>& b);
 };

@@ -16,7 +16,7 @@ std::vector<CpuData> CpuMonitor::getUsage()
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     CpuMonitor::readProc_(curr);
 
-    CpuMonitor::calcDiff_(prev, curr);
+    CpuMonitor::computeDiff_(prev, curr);
 
     return curr;
 }
@@ -51,12 +51,12 @@ void CpuMonitor::readProc_(std::vector<CpuData>& cpuData)
     file.close();
 }
 
-size_t CpuMonitor::calcIdleTime_(const CpuData& cpuData)
+size_t CpuMonitor::computeIdleTime_(const CpuData& cpuData)
 {
     return cpuData.times[S_IDLE] + cpuData.times[S_IOWAIT];
 }
 
-size_t CpuMonitor::calcActiveTime_(const CpuData& cpuData)
+size_t CpuMonitor::computeActiveTime_(const CpuData& cpuData)
 {
     return cpuData.times[S_USER]    + cpuData.times[S_NICE]  +
            cpuData.times[S_SYSTEM]  + cpuData.times[S_IRQ]   +
@@ -64,15 +64,15 @@ size_t CpuMonitor::calcActiveTime_(const CpuData& cpuData)
            cpuData.times[S_GUEST]   + cpuData.times[S_GUEST_NICE];
 }
 
-void CpuMonitor::calcDiff_(const std::vector<CpuData>& a, std::vector<CpuData>& b)
+void CpuMonitor::computeDiff_(const std::vector<CpuData>& a, std::vector<CpuData>& b)
 {
     if (a.size() != b.size())
         throw Exception("Cpu vectors are not equal", -1);
 
     for (size_t i = 0; i < a.size(); ++i)
     {
-        auto active = calcActiveTime_(b[i]) - calcActiveTime_(a[i]);
-        auto idle   = calcIdleTime_(b[i]) - calcIdleTime_(a[i]);
+        auto active = computeActiveTime_(b[i]) - computeActiveTime_(a[i]);
+        auto idle   = computeIdleTime_(b[i]) - computeIdleTime_(a[i]);
         b[i].usage = (100.f * active / (active + idle));
     }
 }
