@@ -6,7 +6,7 @@
 namespace udp
 {
 
-// Adapter to Linux userspace network
+// Adapter to a Linux UDP socket
 class Socket : public BaseSocket 
 {
     public:

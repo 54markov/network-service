@@ -7,7 +7,7 @@ namespace tcp
 {
 
 Socket::Socket(const std::string& ip, const int port)
-    : BaseSocket(SOCK_STREAM, ip.c_str(), port)
+    : BaseSocket(SOCK_STREAM, port, ip.c_str())
 {
     ;
 }
@@ -22,7 +22,9 @@ void Socket::listen(int maxConnetions)
 void Socket::connect()
 {
     auto addr = BaseSocket::getAddr();
-    if (::connect(BaseSocket::getFd(), (struct sockaddr* )&addr, sizeof(addr)) != 0)
+    if (::connect(BaseSocket::getFd(),
+                  reinterpret_cast<struct sockaddr *>(&addr),
+                  sizeof(addr)) != 0)
         throw Exception("Can't connect(): " +
                         std::string(::strerror(errno)), errno);
 }
@@ -42,6 +44,9 @@ int Socket::accept()
 
 void Socket::send(const int fd, DataProtocol &dataProtocol)
 {
+    if (fd < 0)
+        throw Exception("Can't send(): not valid fd", -1);
+
     auto str = dataProtocol.serialize();
     if (::send(fd, str.c_str(), str.length(), 0) == 0)
         throw Exception("Can't send(): " +
@@ -50,6 +55,9 @@ void Socket::send(const int fd, DataProtocol &dataProtocol)
 
 ssize_t Socket::recv(const int fd, DataProtocol &dataProtocol)
 {
+    if (fd < 0)
+        throw Exception("Can't recv(): not valid fd", -1);
+
     size_t len = 256;
     char buf[256] = { 0 };
 
@@ -64,6 +72,9 @@ ssize_t Socket::recv(const int fd, DataProtocol &dataProtocol)
 
 ssize_t Socket::check(const int fd)
 {
+    if (fd < 0)
+        throw Exception("Can't check(): not valid fd", -1);
+
     char buf[1] = { 0 };
     return ::recv(fd, buf, 1, MSG_PEEK | MSG_DONTWAIT);
     // Afterwards, you must check errno if it fails.

@@ -19,6 +19,9 @@
 /*                +- DataObject                                               */
 /*                +- DataString                                               */
 /*                +- DataArray -> [ *,*,* ]                                   */
+/*                                                                            */
+/* Note: for now data protocol must be less than 256 bytes, otherwise have to */
+/*       split to part.                                                       */
 /******************************************************************************/
 class DataProtocol
 {

@@ -1,9 +1,11 @@
 #include <network/socket.hpp>
 #include <exception/exception.hpp>
 
-BaseSocket::BaseSocket(int type, const char* ip, int port)
+#include <iostream>
+
+BaseSocket::BaseSocket(int type, int port, const char* ip)
 {
-    fd_ = socket(AF_INET, type, 0); // TODO
+    fd_ = socket(AF_INET, type, 0);
     if (fd_ == -1)
         throw Exception("Can't create socket(): " +
                         std::string(::strerror(errno)), errno);
@@ -19,9 +21,9 @@ BaseSocket::~BaseSocket()
     {
         BaseSocket::close(fd_);
     }
-    catch(...)
+    catch(Exception& exception)
     {
-        ; // Do not propagate exception
+        std::cerr << exception.what() << std::endl;
     }
 }
 
@@ -37,6 +39,10 @@ struct sockaddr_in BaseSocket::getAddr()
 
 void BaseSocket::bind()
 {
+    /*
+     * The reinterpret_cast operator changes a pointer
+     * to any other type of pointer.
+     */
     if (::bind(fd_, reinterpret_cast<struct sockaddr *>(&address_),
                sizeof(address_)) != 0)
         throw Exception("Can't bind(): " +
@@ -45,7 +51,9 @@ void BaseSocket::bind()
 
 void BaseSocket::close(const int fd)
 {
-    ::close(fd);
+    if (::close(fd_) == -1)
+        throw Exception("Can't close socket(): " +
+                        std::string(::strerror(errno)), errno);
 }
 
 void BaseSocket::setOpt(const int level, const int options)
@@ -63,6 +71,9 @@ void BaseSocket::setNonBlocking()
 
 void BaseSocket::setNonBlocking(const int fd)
 {
+    if (fd < 0)
+        throw Exception("Can't set to non-blocking: not valid fd", -1);
+
     auto opts = ::fcntl(fd, F_GETFL, 0);
     if (opts < 0)
         throw Exception("Can't get socket flags: " +
@@ -71,11 +82,9 @@ void BaseSocket::setNonBlocking(const int fd)
     opts = (opts | O_NONBLOCK);
 
     if (::fcntl(fd, F_SETFL, opts) < 0)
-        throw Exception("Can't set socket to non-blocking state" +
+        throw Exception("Can't set to non-blocking state: " +
                         std::string(::strerror(errno)), errno);
 }
-
-#include <iostream>
 
 int BaseSocket::monitorFd(struct timeval& timeout)
 {
@@ -84,10 +93,9 @@ int BaseSocket::monitorFd(struct timeval& timeout)
      * waiting until one or more of the file descriptors
      * become "ready" for some class of I/O operation
      */
-    auto fds = ::select(highFd_ + 1, &(setFd_), reinterpret_cast<fd_set*>(0),
-                        reinterpret_cast<fd_set*>(0), &timeout);
+    auto fds = ::select(highFd_ + 1, &(monitorFd_), nullptr, nullptr, &timeout);
     if (fds == -1 && !EINTR)
-        throw Exception("Can't ::select()" +
+        throw Exception("Can't select(): " +
                         std::string(::strerror(errno)), errno);
 
     return fds;
@@ -100,31 +108,36 @@ bool BaseSocket::isMonitorFdReady()
 
 bool BaseSocket::isMonitorFdReady(const int fd)
 {
-    return FD_ISSET(fd, &(this->setFd_));
+    if (fd < 0)
+        throw Exception("Can't check: not valid fd", -1);
+
+    return FD_ISSET(fd, &(monitorFd_));
 }
 
 void BaseSocket::setMonitorFd(const int fd)
 {
-    if (fd != 0)
-    {
-        // Adds the socket file descriptor to the monitoring for select()
-        FD_SET(fd, &(setFd_));
+    if (fd < 0)
+        throw Exception("Can't set: not valid fd", -1);
 
-        // We need the highest socket for select()
-        if (fd > highFd_)
-            highFd_ = fd;
-    }
+    // Adds the socket file descriptor to the monitoring for select()
+    FD_SET(fd, &(monitorFd_));
+
+    // We need the highest socket for select()
+    if (fd > highFd_)
+        highFd_ = fd;
 }
 
 void BaseSocket::clearMonitorFd(const int fd)
 {
-    if (fd != 0)
-        FD_CLR(fd, &(this->setFd_));
+    if (fd < 0)
+        throw Exception("Can't clear: not valid fd", -1);
+
+    FD_CLR(fd, &(monitorFd_));
 }
 
 void BaseSocket::clearMonitorFdAll()
 {
     highFd_ = fd_;
-    FD_ZERO(&(setFd_));
-    FD_SET(fd_, &(setFd_));
+    FD_ZERO(&(monitorFd_));
+    FD_SET(fd_, &(monitorFd_));
 }

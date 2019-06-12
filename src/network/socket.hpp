@@ -8,11 +8,11 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-// A socket base class
+// A base socket class
 class BaseSocket
 {
     public:
-        explicit BaseSocket(int type, const char* ip, int port);
+        explicit BaseSocket(int type, int port, const char* ip);
         ~BaseSocket();
 
         int getFd();
@@ -36,10 +36,8 @@ class BaseSocket
         void clearMonitorFdAll();
 
     private:
-        int fd_;
-        int highFd_;
-
-        fd_set setFd_;
-
-        struct sockaddr_in address_;
+        int fd_;                     // Self fd
+        int highFd_;                 // Highest fd
+        fd_set monitorFd_;           // Monitoring fd
+        struct sockaddr_in address_; // Socket address
 };

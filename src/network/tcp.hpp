@@ -3,10 +3,10 @@
 #include <network/socket.hpp>
 #include <data-protocol/data-protocol.hpp>
 
-// Adapter to Linux userspace network
 namespace tcp
 {
 
+// Adapter to a Linux TCP socket
 class Socket : public BaseSocket 
 {
     public:
