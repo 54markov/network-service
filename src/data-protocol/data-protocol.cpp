@@ -32,8 +32,7 @@ void DataProtocol::deserialize(std::string string)
     data_ = std::move(DataProtocol::parse_(string));
 }
 
-
-void DataProtocol::build(std::vector<CpuData>& v)
+void DataProtocol::build(std::vector<CpuData>& cpuData)
 {
     auto deleted = std::move(data_);
 
@@ -41,7 +40,7 @@ void DataProtocol::build(std::vector<CpuData>& v)
 
     auto dataArray = std::make_unique<DataArray>();
 
-    for (auto i : v)
+    for (auto i : cpuData)
     {
         std::string cpu = i.name;
         std::string usage = std::to_string(i.usage);
@@ -91,15 +90,13 @@ std::vector<std::string> DataProtocol::split_(std::string s, const std::string& 
 std::unique_ptr<IData> DataProtocol::parseObject_(std::string string)
 {
     if (string.length() == 0)
-        return nullptr;
-
-    //std::cout << "Object: " << string << std::endl;
+        return nullptr; // An empty object
 
     string.erase(string.begin());
     string.erase(string.end() - 1);
 
     if (string.length() == 0)
-        return nullptr; // An empty IData
+        return nullptr; // An empty object
 
     std::size_t found = string.find(":");
     std::string key = std::string(string.begin(), string.begin() + found);
@@ -122,15 +119,15 @@ std::unique_ptr<IData> DataProtocol::parseObject_(std::string string)
         return std::make_unique<DataObject>(key, newValue);
     }
 
-    return nullptr; // An empty IData
+    return nullptr; // An empty object
 }
 
 std::unique_ptr<IData> DataProtocol::parseArray_(std::string string)
 {
-    if (string.length() == 0)
-        return nullptr; // An empty IData
-
     auto dataArray = std::make_unique<DataArray>();
+
+    if (string.length() == 0)
+        return nullptr; // An empty object
 
     string.erase(string.begin());
     string.erase(string.end() - 1);
@@ -174,7 +171,7 @@ std::unique_ptr<IData> DataProtocol::parseArray_(std::string string)
 std::unique_ptr<IData> DataProtocol::parse_(std::string string)
 {
     if (string.length() == 0)
-        return nullptr; // An empty IData
+        return nullptr; // An empty object
 
     switch (string[0])
     {
@@ -183,5 +180,5 @@ std::unique_ptr<IData> DataProtocol::parse_(std::string string)
         default: break;
     }
 
-    return nullptr; // An empty IData
+    return nullptr; // An empty object
 }

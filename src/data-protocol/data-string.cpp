@@ -19,5 +19,6 @@ void DataString::print()
 
 std::string DataString::find(std::string& key)
 {
+    // Not supproted
     return std::string("");
 }

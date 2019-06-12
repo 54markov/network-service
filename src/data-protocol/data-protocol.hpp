@@ -7,7 +7,7 @@
 #include <memory>
 
 /******************************************************************************/
-/* Data procotol organization^                                                */
+/* Data procotol organization                                                 */
 /*  iData interface                                                           */
 /*        |                                                                   */
 /* { key: value } <- DataObject                                               */
@@ -29,7 +29,7 @@ class DataProtocol
         DataProtocol() = default;
         ~DataProtocol() = default;
 
-        void build(std::vector<CpuData>& v);
+        void build(std::vector<CpuData>& cpuData);
 
         std::string serialize();
         void print();

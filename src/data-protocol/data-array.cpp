@@ -42,5 +42,6 @@ std::string DataArray::find(std::string& key)
         if (string != "")
             return string;
     }
+
     return std::string("");
 }

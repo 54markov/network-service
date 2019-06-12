@@ -11,14 +11,15 @@ DataObject::DataObject(std::string& name, std::unique_ptr<IData>& value)
 std::string DataObject::serialize()
 {
     return std::string("{\"" + name_ + "\":" +
-                       value_->serialize() + "}");
+                       (value_ ? value_->serialize() : "") + "}");
 }
 
 void DataObject::print()
 {
     std::cout << "{";
     std::cout << name_ << ":";
-    value_->print();
+    if (value_ != nullptr)
+        value_->print();
     std::cout << "}";
 }
 
@@ -27,5 +28,5 @@ std::string DataObject::find(std::string& key)
     if (key.compare(name_) == 0)
         return DataObject::serialize();
     else
-        return value_->find(key);
+        return (value_ ? value_->find(key) : "");
 }
