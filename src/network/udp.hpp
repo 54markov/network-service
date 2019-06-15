@@ -10,7 +10,7 @@ namespace udp
 class Socket : public BaseSocket 
 {
     public:
-        explicit Socket(const std::string& ip, const int port);
+        Socket(const std::string& ip, const int port);
         ~Socket() = default;
 
         void send(DataProtocol &dataProtocol);

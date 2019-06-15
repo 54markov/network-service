@@ -8,7 +8,7 @@
 class DataString : public IData
 {
     public:
-        explicit DataString(std::string& string);
+        DataString(std::string& string);
         ~DataString() = default;
 
         std::string serialize();

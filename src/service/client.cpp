@@ -16,6 +16,7 @@ Client::Client(const std::string& ip, const int port)
 int Client::run()
 {
     std::cout << "[TCP::Client] Starting" << std::endl;
+
     DataProtocol dataProtocol;
 
     try

@@ -2,6 +2,9 @@
 
 #include <string>
 
+/*
+ * An intreface class for data protocol value
+ */
 class IData
 {
     public:

@@ -11,13 +11,6 @@
 namespace tcp
 {
 
-typedef enum
-{
-    NONE,
-    FAIL,
-    CLOSE
-} rCode;
-
 /******************************************************************************/
 /* create  : Socket                                                           */
 /*             |                                                              */
@@ -34,7 +27,7 @@ typedef enum
 class Server
 {
     public:
-        explicit Server(const std::string& ip, const int port);
+        Server(const std::string& ip, const int port);
         ~Server();
 
         void run();
@@ -44,7 +37,7 @@ class Server
         std::unique_ptr<tcp::Socket> socket_;
         std::map<int, std::string> connections_;
 
-        rCode processConnection_(const int fd);
+        bool processConnection_(const int fd);
 };
 
 }

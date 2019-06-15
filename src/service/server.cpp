@@ -1,4 +1,5 @@
 #include <service/server.hpp>
+#include <exception/exception.hpp>
 
 #include <iostream>
 
@@ -28,57 +29,64 @@ void Server::run()
 
     DataProtocol dataProtocol;
 
-    while (!signalHandler_.isExit())
+    try
     {
-        socket_.get()->clearMonitorFdAll();
-
-        for (auto i: connections_)
-            socket_.get()->setMonitorFd(i.first);
-
-        struct timeval timeout = {
-            .tv_sec  = 60,
-            .tv_usec = 0
-        };
-
-        if (socket_.get()->monitorFd(timeout) > 0)
+        while (!signalHandler_.isExit())
         {
-            if (socket_.get()->isMonitorFdReady())
-            {
-                auto fd = socket_.get()->accept();
-                std::cout << "[TCP::Server] A new connection, fd " << fd << std::endl;
-                connections_.insert(std::make_pair(fd, ""));
-            }
+            socket_.get()->clearMonitorFdAll();
 
-            auto it = connections_.begin();
-            while (it != connections_.end())
+            for (auto i: connections_)
+                socket_.get()->setMonitorFd(i.first);
+
+            struct timeval timeout = {
+                .tv_sec  = 60,
+                .tv_usec = 0
+            };
+
+            if (socket_.get()->monitorFd(timeout) > 0)
             {
-                if (Server::processConnection_(it->first) == CLOSE)
-                    it = connections_.erase(it);
-                else
-                    it++;
+                if (socket_.get()->isMonitorFdReady())
+                {
+                    auto fd = socket_.get()->accept();
+                    std::cout << "[TCP::Server] A new connection, fd " << fd << std::endl;
+                    connections_.insert(std::make_pair(fd, ""));
+                }
+
+                auto it = connections_.begin();
+                while (it != connections_.end())
+                {
+                    if (!Server::processConnection_(it->first))
+                        it = connections_.erase(it);
+                    else
+                        it++;
+                }
             }
         }
+    }
+    catch(Exception& exception)
+    {
+        std::cerr << exception.what() << std::endl;
     }
 
     std::cout << "[TCP::Server] Closing" << std::endl;
 }
 
-rCode Server::processConnection_(const int fd)
+bool Server::processConnection_(const int fd)
 {
     if (!socket_.get()->isMonitorFdReady(fd))
-        return NONE;
+        return true;
 
     DataProtocol dataProtocol;
     if (socket_.get()->recv(fd, dataProtocol) == 0)
     {
         std::cout << "[TCP::Server] Closing connection, fd " << fd << std::endl;
         socket_.get()->close(fd);
-        return CLOSE;
+        return false;
     }
 
     dataProtocol.print();
 
-    return NONE;
+    return true;
 }
 
 }

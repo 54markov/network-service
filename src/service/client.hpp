@@ -21,7 +21,7 @@ namespace tcp
 class Client
 {
     public:
-        explicit Client(const std::string& ip, const int port);
+        Client(const std::string& ip, const int port);
         ~Client() = default;
 
         int run();

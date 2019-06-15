@@ -12,8 +12,8 @@
 class BaseSocket
 {
     public:
-        explicit BaseSocket(int type, int port, const char* ip);
-        ~BaseSocket();
+        BaseSocket(int type, int port, const char* ip);
+        virtual ~BaseSocket();
 
         int getFd();
         struct sockaddr_in getAddr();

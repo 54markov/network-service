@@ -9,7 +9,7 @@
 class DataObject : public IData
 {
     public:
-        explicit DataObject(std::string& name, std::unique_ptr<IData>& value);
+        DataObject(std::string& name, std::unique_ptr<IData>& value);
         ~DataObject() = default;
 
         std::string serialize();
