@@ -57,7 +57,7 @@ namespace udp
 class Server
 {
     public:
-        explicit Server(const std::string& ip, const int port);
+        Server(const std::string& ip, const int port);
         ~Server() = default;
 
         void run();
