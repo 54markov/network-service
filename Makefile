@@ -1,105 +1,30 @@
-SRC_DIR     := src
-BUILD_DIR   := build
-TARGET      := network-service
-TEST        := data-protocol-tests
-NETWORK     := socket tcp udp
-SERVICE     := client server
-DATA        := data-protocol data-object data-array data-string
-UTIL        := signal exception cpu-monitor
-
-CC          := g++
-CFLAGS      := -g -Wall -Werror -std=c++17
+CXX         := g++
+CPPFLAGS    := -g -Wall -Werror -std=c++17 -MMD -MP
 IFLAGS      := -I ./src
 
-all: $(NETWORK) $(SERVICE) $(DATA) $(UTIL) $(TARGET) $(TEST)
+MKDIR_P     := mkdir -p
 
-$(TARGET):
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR)
-	@$(CC) $(CFLAGS) $(IFLAGS) -o $(BUILD_DIR)/$(TARGET) \
-	$(BUILD_DIR)/client.o \
-	$(BUILD_DIR)/server.o \
-	$(BUILD_DIR)/data-protocol.o \
-	$(BUILD_DIR)/data-string.o \
-	$(BUILD_DIR)/data-object.o \
-	$(BUILD_DIR)/data-array.o \
-	$(BUILD_DIR)/exception.o \
-	$(BUILD_DIR)/socket.o \
-	$(BUILD_DIR)/tcp.o \
-	$(BUILD_DIR)/udp.o \
-	$(BUILD_DIR)/signal.o \
-	$(BUILD_DIR)/cpu-monitor.o \
-	$(SRC_DIR)/main.cpp
+TARGET_EXEC := network-service
+BUILD_DIR   := build
+SRC_DIRS    := src
 
-$(TEST):
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -o $(BUILD_DIR)/data-protocol-tests \
-	./tests/data-protocol-tests.cpp \
-	$(BUILD_DIR)/data-protocol.o \
-	$(BUILD_DIR)/data-string.o \
-	$(BUILD_DIR)/data-object.o \
-	$(BUILD_DIR)/data-array.o
+SRCS        := $(shell find $(SRC_DIRS) -name *.cpp)
+OBJS        := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS        := $(OBJS:.o=.d)
 
-cpu-monitor:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/$@/$@.cpp
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	@echo "[ Building $(TARGET_EXEC) ]";
+	@$(CXX) $(OBJS) -o $@;
 
-signal:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/service/$@.cpp
+$(BUILD_DIR)/%.o: %
+	@echo "[ Building $(patsubst %.cpp.o,%,$(lastword $(subst /, ,$@))) ]";
+	@$(MKDIR_P) $(dir $@);
+	@$(CXX) $(CPPFLAGS) $(IFLAGS) -c $< -o $@;
 
-exception:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/$@/$@.cpp
-
-socket:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/network/$@.cpp
-tcp:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/network/$@.cpp
-
-udp:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/network/$@.cpp
-
-client:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/service/$@.cpp
-
-server:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/service/$@.cpp
-
-data-protocol:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/$@/$@.cpp
-
-data-object:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/data-protocol/$@.cpp
-
-data-array:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/data-protocol/$@.cpp
-
-data-string:
-	@echo "[ Building $@ ]";
-	@mkdir -p $(BUILD_DIR);
-	@$(CC) $(CFLAGS) $(IFLAGS) -c -o $(BUILD_DIR)/$@.o $(SRC_DIR)/data-protocol/$@.cpp
-
+.PHONY: clean
 clean:
 	@echo "[ Cleaning $(BUILD_DIR) ]";
-	@rm -Rf $(BUILD_DIR);
+	@$(RM) -r $(BUILD_DIR);
+
+-include $(DEPS)
+
